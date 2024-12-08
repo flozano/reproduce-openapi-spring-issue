@@ -12,9 +12,6 @@ paths:
       operationId: PostTenant
       description: |-
         Create a tenant.
-      #VFE:scope: TenantUserWrite
-      security:
-        - Bearer: []
       parameters:
         - name: user-info
           in: body
