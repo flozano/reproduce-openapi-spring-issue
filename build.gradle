@@ -1,0 +1,71 @@
+plugins {
+    id "org.openapi.generator" version "${openApiGeneratorVersion}"
+    id 'java'
+}    
+
+
+group = 'io.github.flozano.openapireproduce'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+openApiGenerate {
+    String pkg = "io.github.flozano.openapireproduce"
+    generatorName = "spring"
+    inputSpec = "${project.projectDir}/src/main/resources/swagger-testing.yaml".toString()
+    outputDir = "${project.buildDir}/generated".toString()
+    apiPackage = pkg + ".api"
+    invokerPackage = pkg + ".invoker"
+    modelPackage = pkg + ".model"
+    configOptions = [
+            basePackage          : pkg,
+            configPackage        : pkg + ".config",
+            java8                : "true",
+            dateLibrary          : "java8",
+            //serializationLibrary : "jackson",
+            useBeanValidation    : "true",
+            //enableBuilderSupport : "true",
+            //annotationLibrary    : "none",
+            //useJakartaEe         : "true",
+            //interfaceOnly        : "true",
+            //ensureUniqueParams   : "true",
+            library              : "spring-http-interface",
+            //requestMappingMode   : "api_interface",
+            unhandledException   : "true",
+            //useOptional          : "true",
+            //documentationProvider: "none"
+    ]
+    enablePostProcessFile = true
+    skipOverwrite = false
+    globalProperties = [
+            modelDocs: "true"
+    ]
+
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/src/main/java'
+        }
+    }
+    test {
+        java {
+            srcDirs 'build/generated/src/test/java'
+        }
+    }
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+dependencies {
+    implementation group: 'org.openapitools', name: 'jackson-databind-nullable', version: '0.2.6'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

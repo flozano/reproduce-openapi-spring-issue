@@ -1,0 +1,93 @@
+swagger: "2.0"
+info:
+  title: UserAPI
+  description: User API
+  version: 1.0.0
+host: api.flozano.github.io
+schemes:
+  - https
+paths:
+  /users:
+    post:
+      operationId: PostTenant
+      description: |-
+        Create a tenant.
+      #VFE:scope: TenantUserWrite
+      security:
+        - Bearer: []
+      parameters:
+        - name: user-info
+          in: body
+          description: |
+            User data to register
+          required: true
+          schema:
+            $ref: '#/definitions/UserNew'
+      responses:
+        '201':
+          description: Successful response
+
+definitions:
+  AlertMethod:
+    type: string
+    enum:
+      - email
+      - sms
+      - push
+      - NONE
+  UserPassword:
+    description: |
+      A type for password for users.
+    type: string
+    minLength: 6
+    maxLength: 50
+  Role:
+    type: string
+    enum:
+      - admin
+      - technician
+      - observer
+  AlertMethods:
+    description: |
+      List of prefered alert methods.
+      It can be combination of `"email"`, `"sms"`, and `"push"` value.
+      `"NONE"` is a special value that can't be combined with other values.
+    type: array
+    items: { $ref: '#/definitions/AlertMethod' }
+    maxItems: 3
+    uniqueItems: true
+  Metadata:
+    type: object
+    
+  UserNew:
+    type: object
+    description: |
+      Object to create a new user.
+
+      alertMethod is deprecated. Please use alertMethods instead
+      of it. alertMethod and alertMethods are exclusive.
+    properties:
+      email:
+        description: Email address for new user.
+        type: string
+        minLength: 1
+      password: { $ref: '#/definitions/UserPassword' }
+      role:
+        allOf:
+          - description: if role is omitted, `"technician"` is used as default.
+          - $ref: '#/definitions/Role'
+      smsNumber:
+        description: unavailable `smsNumber` is forbidden if `alertMethod` is `"sms"` or `alertMethods` includes `"sms"`.
+        type: string
+      alertMethod:
+        allOf:
+          - description: |-
+              `alertMethod` is deprecated. Please use `alertMethods`
+              instead of it.
+          - $ref: '#/definitions/AlertMethod'
+      alertMethods: { $ref: '#/definitions/AlertMethods' }
+      metadata: { $ref: '#/definitions/Metadata' }
+    additionalProperties: false
+    required:
+      - email
+      - password
